@@ -1,6 +1,6 @@
-package com.securityoauth2sample.jwt.filter;
+package com.securityoauth2sample.auth.jwt.filter;
 
-import com.securityoauth2sample.jwt.util.JwtProvider;
+import com.securityoauth2sample.auth.jwt.util.JwtProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

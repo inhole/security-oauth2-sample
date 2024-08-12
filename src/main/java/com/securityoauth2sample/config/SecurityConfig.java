@@ -1,10 +1,10 @@
 package com.securityoauth2sample.config;
 
-import com.securityoauth2sample.handler.Http403Handler;
-import com.securityoauth2sample.handler.Http401Handler;
-import com.securityoauth2sample.handler.OAuth2SuccessHandler;
-import com.securityoauth2sample.jwt.filter.JwtAuthenticationFilter;
-import com.securityoauth2sample.service.CustomOAuth2UserService;
+import com.securityoauth2sample.auth.handler.Http403Handler;
+import com.securityoauth2sample.auth.handler.Http401Handler;
+import com.securityoauth2sample.auth.handler.OAuth2SuccessHandler;
+import com.securityoauth2sample.auth.jwt.filter.JwtAuthenticationFilter;
+import com.securityoauth2sample.auth.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -54,7 +54,9 @@ public class SecurityConfig {
                 .logout(AbstractHttpConfigurer::disable) // 기본 logout 비활성화
                 .headers(c -> c.frameOptions(
                         FrameOptionsConfig::disable).disable()) // X-Frame-Options 비활성화
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 설정 NEVER: 기존에 세션이 존재하면 사용, STATELESS: 사용 안함
+
+                // 세션 설정 NEVER: 기존에 세션이 존재하면 사용, STATELESS: 사용 안함
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize. // 권한이 없으면 해당 uri 제외하고 접근 불가
                         anyRequest().permitAll())
 
