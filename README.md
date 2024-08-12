@@ -4,7 +4,7 @@
 스프링 시큐리티 (OAuth2) 설정 할때마다 매번 헷갈리고 이해 하고자 만든 샘플 프로젝트이다. 
 ````
 
-## Architecture
+## Spring Security Architecture
 ![img.png](src/main/resources/static/img/img.png)
 
 ## 흐름을 적어보았다.
@@ -48,6 +48,9 @@
 10. SecurityContext에 인증 객체를 설정
 
 -> Authentication 객체를 Security Context에 저장한다.
-````
-#### -최종적으로는 SecurityContextHolder는 세션 영역에 있는 SecurityContext에 Authentication 객체를 저장한다. 사용자 정보를 저장한다는 것은 스프링 시큐리티가 전통적인 세선-쿠키 기반의 인증 방식을 사용한다는 것을 의미한다.
 
+최종적으로는 SecurityContextHolder는 세션 영역에 있는 SecurityContext에 Authentication 객체를 저장한다. 사용자 정보를 저장한다는 것은 스프링 시큐리티가 전통적인 세선-쿠키 기반의 인증 방식을 사용한다는 것을 의미한다.
+````
+
+## OAuth2 login 흐름
+![oAuth2.png](src/main/resources/static/img/oAuth2.png)
