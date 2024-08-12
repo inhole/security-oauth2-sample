@@ -5,7 +5,7 @@
 ````
 
 ## Spring Security Architecture
-![img.png](src/main/resources/static/img/img.png)
+![security.png](src/main/resources/static/img/security.png)
 
 ## 흐름을 적어보았다.
 ````    
