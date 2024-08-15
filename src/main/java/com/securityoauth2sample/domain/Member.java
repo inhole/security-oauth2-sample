@@ -1,4 +1,4 @@
-package com.securityoauth2sample.domain.member.entity;
+package com.securityoauth2sample.domain;
 
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -24,14 +24,12 @@ public class Member {
 
     private MemberRole memberRole;
 
-    private String memberKey;
-
     @Builder
-    public Member(String name, String email, String profile, MemberRole memberRole, String memberKey) {
+    public Member(String name, String email, String password, String profile, MemberRole memberRole, String memberKey) {
         this.name = name;
         this.email = email;
+        this.password = password;
         this.profile = profile;
         this.memberRole = memberRole;
-        this.memberKey = memberKey;
     }
 }

@@ -1,4 +1,4 @@
-package com.securityoauth2sample.domain.member.entity;
+package com.securityoauth2sample.domain;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

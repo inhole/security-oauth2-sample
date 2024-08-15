@@ -1,9 +1,9 @@
-package com.securityoauth2sample.auth.dto;
+package com.securityoauth2sample.config.model;
 
 import com.securityoauth2sample.common.KeyGenerator;
-import com.securityoauth2sample.domain.member.entity.Member;
-import com.securityoauth2sample.domain.member.entity.MemberRole;
-import com.securityoauth2sample.exception.InvalidRegistrationId;
+import com.securityoauth2sample.domain.Member;
+import com.securityoauth2sample.domain.MemberRole;
+import com.securityoauth2sample.exception.oauth2.InvalidRegistrationId;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

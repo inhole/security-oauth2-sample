@@ -1,4 +1,6 @@
-package com.securityoauth2sample.exception;
+package com.securityoauth2sample.exception.jwt;
+
+import com.securityoauth2sample.exception.CustomException;
 
 public class Unauthorized extends CustomException {
 

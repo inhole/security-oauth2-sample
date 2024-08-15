@@ -1,10 +1,10 @@
 package com.securityoauth2sample.config;
 
-import com.securityoauth2sample.auth.handler.Http403Handler;
-import com.securityoauth2sample.auth.handler.Http401Handler;
-import com.securityoauth2sample.auth.handler.OAuth2SuccessHandler;
-import com.securityoauth2sample.auth.jwt.filter.JwtAuthenticationFilter;
-import com.securityoauth2sample.auth.service.CustomOAuth2UserService;
+import com.securityoauth2sample.config.filter.JwtAuthenticationFilter;
+import com.securityoauth2sample.config.handler.CommonLoginFailHandler;
+import com.securityoauth2sample.config.handler.CommonLoginSuccessHandler;
+import com.securityoauth2sample.config.handler.Http401Handler;
+import com.securityoauth2sample.config.handler.Http403Handler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +14,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
@@ -29,8 +31,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final CustomOAuth2UserService oAuth2UserService;
-    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+//    private final CustomOAuth2UserService oAuth2UserService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
@@ -44,14 +45,20 @@ public class SecurityConfig {
 
         http
                 .cors(httpSecurityCorsConfigurer -> httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf
-                        .csrfTokenRepository(csrfTokenRepository())
-                        // 특정 URL 패턴에 대해 CSRF 보호 비활성화)
-                        .ignoringRequestMatchers("/api/no-csrf/**")
-                )
+                .csrf(AbstractHttpConfigurer::disable)
+//                .csrf(csrf -> csrf
+//                        .csrfTokenRepository(csrfTokenRepository())
+//                        // 특정 URL 패턴에 대해 CSRF 보호 비활성화)
+//                        .ignoringRequestMatchers("/api/no-csrf/**")
+//                )
                 .httpBasic(AbstractHttpConfigurer::disable) // 기본 인증 로그인 비활성화
-                .formLogin(AbstractHttpConfigurer::disable) // 기본 login form 비활성화
-                .logout(AbstractHttpConfigurer::disable) // 기본 logout 비활성화
+//                .formLogin(AbstractHttpConfigurer::disable) // 기본 login form 비활성화
+                .formLogin(login -> login
+                        .loginPage("/login")
+                        .successHandler(new CommonLoginSuccessHandler())
+                        .failureHandler(new CommonLoginFailHandler())
+                )
+//                .logout(AbstractHttpConfigurer::disable) // 기본 logout 비활성화
                 .headers(c -> c.frameOptions(
                         FrameOptionsConfig::disable).disable()) // X-Frame-Options 비활성화
 
@@ -60,10 +67,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize. // 권한이 없으면 해당 uri 제외하고 접근 불가
                         anyRequest().permitAll())
 
-                .oauth2Login(oauth -> // OAuth2 로그인 기능에 대한 여러 설정의 진입점
-                        // OAuth2 로그인 성공 이후 사용자 정보를 가져올 때의 설정을 담당
-                        oauth.userInfoEndpoint(c -> c.userService(oAuth2UserService))
-                                .successHandler(oAuth2SuccessHandler))
+//                .oauth2Login(oauth -> // OAuth2 로그인 기능에 대한 여러 설정의 진입점
+//                        // OAuth2 로그인 성공 이후 사용자 정보를 가져올 때의 설정을 담당
+//                        oauth.userInfoEndpoint(c -> c.userService(oAuth2UserService))
+//                                .successHandler(oAuth2SuccessHandler))
 
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(e -> e
@@ -108,6 +115,24 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", corsConfiguration); // 모든 경로에 대해서 CORS 설정을 적용
 
         return source;
+    }
+
+    /**
+     * User Password 인코딩 (Scrypt)
+     * @return
+     */
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+
+        return new SCryptPasswordEncoder(
+                16,
+                8,
+                1,
+                32,
+                64);
+
+        // test 용
+//        return NoOpPasswordEncoder.getInstance();
     }
 
 }

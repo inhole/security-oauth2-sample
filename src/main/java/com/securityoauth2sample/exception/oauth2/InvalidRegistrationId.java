@@ -1,6 +1,6 @@
-package com.securityoauth2sample.exception;
+package com.securityoauth2sample.exception.oauth2;
 
-import org.springframework.http.HttpStatus;
+import com.securityoauth2sample.exception.CustomException;
 
 public class InvalidRegistrationId extends CustomException {
 
