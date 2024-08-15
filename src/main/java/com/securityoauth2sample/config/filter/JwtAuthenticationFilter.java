@@ -27,11 +27,11 @@ import java.util.Map;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
-    private static AppConfig appConfig;
+    private final AppConfig appConfig;
 
-    private static final String[] whitelist = {"/auth/signUp", "/login" , "/refresh", "/", "/index.html"};
+    private static final String[] whitelist = { "/h2-console", "/auth/signUp", "/auth/login" , "/refresh", "/", "/index.html" };
 
-    private static void checkAuthorizationHeader(String header) {
+    private void checkAuthorizationHeader(String header) {
         if(header == null) {
             // token이 전달되지 않음
             throw new CustomJwtException();
@@ -56,8 +56,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             checkAuthorizationHeader(authHeader);   // header 가 올바른 형식인지 체크
-            String token = JwtUtils.getTokenFromHeader(authHeader);
-            Authentication authentication = JwtUtils.getAuthentication(token);
+            String token = jwtUtils.getTokenFromHeader(authHeader);
+            Authentication authentication = jwtUtils.getAuthentication(token);
 
             log.info("authentication = {}", authentication);
 

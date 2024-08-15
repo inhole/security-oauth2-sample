@@ -22,6 +22,7 @@ public class Member {
 
     private String profile;
 
+    @Enumerated(EnumType.STRING)
     private MemberRole memberRole;
 
     @Builder

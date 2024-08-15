@@ -1,16 +1,19 @@
 package com.securityoauth2sample.config;
 
 import io.jsonwebtoken.security.Keys;
-import lombok.Data;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Base64;
 
 @ConfigurationProperties(prefix = "jwt")
-@Data
+@Getter
+@Setter
 public class AppConfig {
 
     private SecretKey key;

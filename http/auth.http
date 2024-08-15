@@ -1,0 +1,21 @@
+### 회원가입
+
+POST http://localhost:8080/auth/signUp
+Content-Type: application/json
+
+{
+  "email": "dev",
+  "password": "1234",
+  "name": "ino"
+}
+
+
+### 로그인
+
+POST localhost:8080/auth/login
+Content-Type: application/json
+
+{
+  "email": "dev",
+  "password": "1234"
+}

@@ -24,14 +24,14 @@ import java.util.*;
 @Component
 public class JwtUtils {
 
-    private static AppConfig appConfig;
+    private final AppConfig appConfig;
 
     // 헤더에 "Bearer XXX" 형식으로 담겨온 토큰을 추출한다
-    public static String getTokenFromHeader(String header) {
+    public String getTokenFromHeader(String header) {
         return header.split(" ")[1];
     }
 
-    public static String generateKey() {
+    public String generateKey() {
         // 암호화 키 생성
         SecretKey key2 = Jwts.SIG.HS256.key().build();
         byte[] encodedKey = key2.getEncoded();
@@ -46,7 +46,7 @@ public class JwtUtils {
      * @param validTime
      * @return
      */
-    public static String generateAccessToken(Map<String, Object> valueMap, int validTime) {
+    public String generateAccessToken(Map<String, Object> valueMap, int validTime) {
 
         SecretKey key = null;
         try {
@@ -54,6 +54,7 @@ public class JwtUtils {
         } catch(Exception e){
             throw new RuntimeException(e.getMessage());
         }
+        // TODO :: 밑에 주석으로 바꿔야함 / Deprecated 임  ... 해더에 들어가는거 확인 ...
         return Jwts.builder()
                 .setHeader(Map.of("typ","JWT"))
                 .setClaims(valueMap)
@@ -70,7 +71,7 @@ public class JwtUtils {
 //                .compact();
     }
 
-    public static Authentication getAuthentication(String token) {
+    public Authentication getAuthentication(String token) {
         Map<String, Object> claims = validateToken(token);
 
         String email = (String) claims.get("email");
@@ -95,7 +96,7 @@ public class JwtUtils {
      * @param token
      * @return
      */
-    public static Map<String, Object> validateToken(String token) {
+    public Map<String, Object> validateToken(String token) {
         Map<String, Object> claim = null;
         try {
             SecretKey key = appConfig.getKey();
@@ -118,7 +119,7 @@ public class JwtUtils {
      * @param token
      * @return
      */
-    public static boolean isExpired(String token) {
+    public boolean isExpired(String token) {
         try {
             validateToken(token);
         } catch (Exception e) {
@@ -130,7 +131,7 @@ public class JwtUtils {
     /**
      * 토큰의 남은 만료시간 계산
      */
-    public static long tokenRemainTime(Integer expTime) {
+    public long tokenRemainTime(Integer expTime) {
         Date expDate = new Date((long) expTime * (1000));
         long remainMs = expDate.getTime() - System.currentTimeMillis();
         return remainMs / (1000 * 60);

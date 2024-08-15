@@ -1,4 +1,4 @@
-package com.inolog.securityoauth2sample;
+package com.securityoauth2sample;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

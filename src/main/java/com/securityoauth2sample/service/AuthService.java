@@ -1,6 +1,7 @@
 package com.securityoauth2sample.service;
 
 import com.securityoauth2sample.domain.Member;
+import com.securityoauth2sample.domain.MemberRole;
 import com.securityoauth2sample.dto.request.SignUp;
 import com.securityoauth2sample.exception.member.AlreadyExistsEmailException;
 import com.securityoauth2sample.repository.MemberRepository;
@@ -29,6 +30,7 @@ public class AuthService {
                 .email(signUp.getEmail())
                 .password(encryptedPassword)
                 .name(signUp.getName())
+                .memberRole(MemberRole.USER)
                 .build();
         memberRepository.save(member);
     }
