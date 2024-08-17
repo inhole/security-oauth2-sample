@@ -31,9 +31,16 @@ public class EmailPasswordAuthFilter extends AbstractAuthenticationProcessingFil
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
+        // 1. 요청 본문에서 이메일과 비밀번호를 읽어 EmailPassword 객체로 반환
         EmailPassword emailPassword = objectMapper.readValue(request.getInputStream(), EmailPassword.class);
 
+        // 2. 인증 정보 생성
         UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(emailPassword.getEmail(), emailPassword.getPassword());
+
+        // 3. 요청의 유저 정보를 details에 저장
+        authRequest.setDetails(this.authenticationDetailsSource.buildDetails(request));
+
+        // 4. AuthenticationManager를 사용하여 인증을 시도합니다.
         return this.getAuthenticationManager().authenticate(authRequest);
     }
 

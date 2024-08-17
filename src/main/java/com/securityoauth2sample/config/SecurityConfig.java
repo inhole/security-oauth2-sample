@@ -1,9 +1,8 @@
 package com.securityoauth2sample.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import com.securityoauth2sample.config.filter.EmailPasswordAuthFilter;
-import com.securityoauth2sample.config.filter.JwtAuthenticationFilter;
+import com.securityoauth2sample.config.filter.JwtAuthFilter;
 import com.securityoauth2sample.config.handler.CommonLoginFailHandler;
 import com.securityoauth2sample.config.handler.CommonLoginSuccessHandler;
 import com.securityoauth2sample.config.handler.Http401Handler;
@@ -31,31 +30,27 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.security.web.csrf.CsrfTokenRepository;
-import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.util.Collections;
-import java.util.List;
+
+import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-//    private final CustomOAuth2UserService oAuth2UserService;
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtAuthFilter jwtAuthFilter;
     private final MemberRepository memberRepository;
-    private final AppConfig appConfig;
     private final JwtUtils jwtUtils;
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() { // security를 적용하지 않을 리소스
         return web -> web.ignoring()
-                .requestMatchers("/error", "/favicon.ico");
+                .requestMatchers("/favicon.ico")
+                .requestMatchers("/error")
+                .requestMatchers(toH2Console());
     }
 
     @Bean
@@ -72,15 +67,26 @@ public class SecurityConfig {
 
                 // 세션 설정 NEVER: 기존에 세션이 존재하면 사용, STATELESS: 사용 안함
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(authorize -> authorize. // 권한이 없으면 해당 uri 제외하고 접근 불가
-                        anyRequest().permitAll())
+
+                // 권한이 없으면 해당 uri 제외하고 접근 불가
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(
+                                new AntPathRequestMatcher("/"),
+                                new AntPathRequestMatcher("/auth/signUp"),
+                                new AntPathRequestMatcher("/auth/login"),
+                                new AntPathRequestMatcher("/h2-console/**")
+                        )
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated()
+                )
 
 //                .oauth2Login(oauth -> // OAuth2 로그인 기능에 대한 여러 설정의 진입점
 //                        // OAuth2 로그인 성공 이후 사용자 정보를 가져올 때의 설정을 담당
 //                        oauth.userInfoEndpoint(c -> c.userService(oAuth2UserService))
 //                                .successHandler(oAuth2SuccessHandler))
 
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(e -> e
                         .accessDeniedHandler(new Http403Handler())
                         .authenticationEntryPoint(new Http401Handler())
@@ -91,7 +97,6 @@ public class SecurityConfig {
 
     /**
      * 커스텀마이징한 유저 정보 인증 필터
-     *
      * @return
      */
     @Bean
@@ -99,24 +104,14 @@ public class SecurityConfig {
         EmailPasswordAuthFilter filter = new EmailPasswordAuthFilter(new ObjectMapper());
         filter.setAuthenticationManager(authenticationManager());
         // 로그인 성공 url
-        filter.setAuthenticationSuccessHandler(new CommonLoginSuccessHandler(appConfig, jwtUtils));
+        filter.setAuthenticationSuccessHandler(new CommonLoginSuccessHandler(jwtUtils));
         // 로그인 실패
         filter.setAuthenticationFailureHandler(new CommonLoginFailHandler());
-        // 세션 발급
-//        filter.setSecurityContextRepository(new HttpSessionSecurityContextRepository());
-
-        // 세션 유효기간 1달 설정
-//        SpringSessionRememberMeServices rememberMeServices = new SpringSessionRememberMeServices();
-//        rememberMeServices.setAlwaysRemember(true);
-//        rememberMeServices.setValiditySeconds(3600 * 24 * 30);
-//        filter.setRememberMeServices(rememberMeServices);
-
         return filter;
     }
 
     /**
      * provider 설정
-     *
      * @return
      */
     @Bean
@@ -127,6 +122,10 @@ public class SecurityConfig {
         return new ProviderManager(provider);
     }
 
+    /**
+     * UserDetailsService 구현체
+     * @return
+     */
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> {

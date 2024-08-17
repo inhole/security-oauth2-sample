@@ -1,6 +1,7 @@
 package com.securityoauth2sample.config.handler;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.securityoauth2sample.exception.member.LoginFailException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -9,22 +10,19 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Map;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
 public class CommonLoginFailHandler implements AuthenticationFailureHandler {
+
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException, IOException {
-        log.info("--------------------------- CommonLoginFailHandler ---------------------------");
+        ObjectMapper objectMapper = new ObjectMapper();
 
-        Gson gson = new Gson();
-        String json = gson.toJson(Map.of("error", "Login Fail"));
-
-        response.setContentType("application/json; charset=UTF-8");
-
-        PrintWriter printWriter = response.getWriter();
-        printWriter.println(json);
-        printWriter.close();
+        response.setContentType(APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding(UTF_8.name());
+        objectMapper.writeValue(response.getWriter(), new LoginFailException(exception));
     }
 }

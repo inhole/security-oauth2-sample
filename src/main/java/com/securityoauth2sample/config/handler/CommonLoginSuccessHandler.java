@@ -1,9 +1,9 @@
 package com.securityoauth2sample.config.handler;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.securityoauth2sample.config.model.PrincipalDetail;
+import com.securityoauth2sample.dto.response.LoginResponse;
 import com.securityoauth2sample.util.JwtUtils;
-import com.securityoauth2sample.config.AppConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,39 +14,35 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Map;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
 @RequiredArgsConstructor
 @Component
 public class CommonLoginSuccessHandler implements AuthenticationSuccessHandler {
 
-    private final AppConfig appConfig;
     private final JwtUtils jwtUtils;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
 
-        log.info("--------------------------- CommonLoginSuccessHandler ---------------------------");
-
+        // 1. PrincipalDetail 객체 생성
         PrincipalDetail principal = (PrincipalDetail) authentication.getPrincipal();
 
-        log.info("authentication.getPrincipal() = {}", principal);
+        // 2. AccessToken, RefreshToken 생성
+        String accessToken = jwtUtils.generateAccessToken(authentication);
+        jwtUtils.generateRefreshToken(authentication);
+        LoginResponse loginResponse = new LoginResponse(accessToken);
 
+        // 3. response
+        ObjectMapper objectMapper = new ObjectMapper();
+        response.setContentType(APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding(UTF_8.name());
+        objectMapper.writeValue(response.getWriter(), loginResponse);
 
-        Map<String, Object> responseMap = principal.getMemberInfo();
-        responseMap.put("accessToken", jwtUtils.generateAccessToken(responseMap, appConfig.getAccessExpTime()));
-        responseMap.put("refreshToken", jwtUtils.generateAccessToken(responseMap, appConfig.getRefreshExpTime()));
-
-        Gson gson = new Gson();
-        String json = gson.toJson(responseMap);
-
-        response.setContentType("application/json; charset=UTF-8");
-
-        PrintWriter writer = response.getWriter();
-        writer.println(json);
-        writer.flush();
     }
 }

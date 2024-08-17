@@ -19,3 +19,11 @@ Content-Type: application/json
   "email": "dev",
   "password": "1234"
 }
+
+
+### test 로그인
+
+GET localhost:8080/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkZXYiLCJyb2xlIjpbeyJhdXRob3JpdHkiOiJST0xFX1VTRVIifV0sImlhdCI6MTcyMzkwNzg3NiwiZXhwIjoxNzIzOTA4NDc2fQ.hoWDr5_Q3JUhlG1nRgx9vaP_V7hoI6sBz4cYV4avR64
+

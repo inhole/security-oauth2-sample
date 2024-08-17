@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
@@ -86,17 +87,14 @@ class AuthControllerTest {
                 .build();
         authService.signUp(signUp);
 
-        Optional<Member> member = memberRepository.findByEmail("dev");
 
-        // when
+        // expected
         mockMvc.perform(post("/auth/login")
                         .content(gson.toJson(signUp))
                         .contentType(APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken").isNotEmpty())
                 .andDo(print());
-        // 검증 로직 추가...
-
-        // then
     }
 }

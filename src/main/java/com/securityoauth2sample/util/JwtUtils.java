@@ -1,11 +1,11 @@
 package com.securityoauth2sample.util;
 
 import com.securityoauth2sample.config.model.PrincipalDetail;
-import com.securityoauth2sample.config.AppConfig;
+import com.securityoauth2sample.config.JwtProperties;
 import com.securityoauth2sample.domain.Member;
 import com.securityoauth2sample.domain.MemberRole;
-import com.securityoauth2sample.exception.jwt.CustomExpiredJwtException;
 import com.securityoauth2sample.exception.jwt.CustomJwtException;
+import com.securityoauth2sample.exception.jwt.InvalidTokenException;
 import com.securityoauth2sample.exception.jwt.Unauthorized;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
 import java.time.ZonedDateTime;
@@ -24,12 +26,7 @@ import java.util.*;
 @Component
 public class JwtUtils {
 
-    private final AppConfig appConfig;
-
-    // 헤더에 "Bearer XXX" 형식으로 담겨온 토큰을 추출한다
-    public String getTokenFromHeader(String header) {
-        return header.split(" ")[1];
-    }
+    private final JwtProperties jwtProperties;
 
     public String generateKey() {
         // 암호화 키 생성
@@ -41,54 +38,58 @@ public class JwtUtils {
     }
 
     /**
+     * AccessToken 생성
+     * @param authentication
+     * @return
+     */
+    public String generateAccessToken(Authentication authentication) {
+        return generateToken(authentication, jwtProperties.getAccessExpTime());
+    }
+
+    /**
+     * RefreshToken 생성
+     * @param authentication
+     * @return
+     */
+    public String generateRefreshToken(Authentication authentication) {
+        return generateToken(authentication, jwtProperties.getRefreshExpTime());
+    }
+
+    /**
      * Token 생성
-     * @param valueMap
+     * @param authentication
      * @param validTime
      * @return
      */
-    public String generateAccessToken(Map<String, Object> valueMap, int validTime) {
+    public String generateToken(Authentication authentication, long validTime) {
 
-        SecretKey key = null;
-        try {
-            key = appConfig.getKey();
-        } catch(Exception e){
-            throw new RuntimeException(e.getMessage());
-        }
-        // TODO :: 밑에 주석으로 바꿔야함 / Deprecated 임  ... 해더에 들어가는거 확인 ...
         return Jwts.builder()
-                .setHeader(Map.of("typ","JWT"))
-                .setClaims(valueMap)
-                .setIssuedAt(Date.from(ZonedDateTime.now().toInstant()))
-                .setExpiration(Date.from(ZonedDateTime.now().plusMinutes(validTime).toInstant()))
-                .signWith(key)
+                .subject(authentication.getName())
+                .claim(jwtProperties.getKeyRole(), authentication.getAuthorities())
+                .signWith(jwtProperties.getKey())
+                .issuedAt(Date.from(ZonedDateTime.now().toInstant()))
+                .expiration(Date.from(ZonedDateTime.now().plusMinutes(validTime).toInstant()))
+//                .setHeader(Map.of("typ","JWT"))
+//                .setClaims(valueMap)
                 .compact();
-
-//        return Jwts.builder()
-//                .subject(authentication.getName())
-//                .signWith(appConfig.getKey())
-//                .issuedAt(new Date()) // 생성 일
-//                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 유효 기간 1시간
-//                .compact();
     }
 
+    /**
+     * 인증 정보 조회
+     * @param token
+     * @return
+     */
     public Authentication getAuthentication(String token) {
-        Map<String, Object> claims = validateToken(token);
+        // 1. Claims 추출
+        Claims claims = parseClaims(token);
 
-        String email = (String) claims.get("email");
-        String name = (String) claims.get("name");
-        String role = (String) claims.get("role");
-        MemberRole memberRole = MemberRole.valueOf(role);
+        // 2. 권한 추출
+        List<SimpleGrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(jwtProperties.getKeyRole()));
 
-        Member member = Member.builder()
-                .email(email)
-                .name(name)
-                .memberRole(memberRole)
-                .build();
+        // 3. security의 User 객체 생성
+        User principal = new User(claims.getSubject(), "", authorities);
 
-        Set<SimpleGrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority(member.getMemberRole().getKey()));
-        PrincipalDetail principalDetail = new PrincipalDetail(member, authorities);
-
-        return new UsernamePasswordAuthenticationToken(principalDetail, "", authorities);
+        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
 
     /**
@@ -96,37 +97,16 @@ public class JwtUtils {
      * @param token
      * @return
      */
-    public Map<String, Object> validateToken(String token) {
-        Map<String, Object> claim = null;
-        try {
-            SecretKey key = appConfig.getKey();
-            claim = Jwts.parser()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token) // 파싱 및 검증, 실패 시 에러
-                    .getBody();
-        } catch(ExpiredJwtException expiredJwtException){
-            throw new CustomExpiredJwtException(expiredJwtException);
-        } catch(Exception e){
-            throw new CustomJwtException();
+    public boolean validateToken(String token) {
+        if (!StringUtils.hasText(token)) {
+            return false;
         }
-        return claim;
+
+        // 만료일 체크
+        Claims claims = parseClaims(token);
+        return claims.getExpiration().after(new Date());
     }
 
-
-    /**
-     * 토큰이 만료되었는지 검증
-     * @param token
-     * @return
-     */
-    public boolean isExpired(String token) {
-        try {
-            validateToken(token);
-        } catch (Exception e) {
-            return (e instanceof CustomExpiredJwtException);
-        }
-        return false;
-    }
 
     /**
      * 토큰의 남은 만료시간 계산
@@ -139,19 +119,23 @@ public class JwtUtils {
 
     /**
      * Claims 추출/검증
-     * @param jws
+     * @param token
      * @return
      */
-    private Claims parseClaims(String jws) {
+    private Claims parseClaims(String token) {
         try {
-            Jws<Claims> claims =  Jwts.parser()
-                    .verifyWith(appConfig.getKey())
+            Jws<Claims> claims = Jwts.parser()
+                    .verifyWith(jwtProperties.getKey())
                     .build()
-                    .parseSignedClaims(jws);
+                    .parseSignedClaims(token);
             return claims.getPayload();
+        } catch (ExpiredJwtException e) {
+            return e.getClaims();
+        } catch (MalformedJwtException e) {
+            throw new InvalidTokenException();
         } catch (JwtException e) {
             log.error("error :: {} ", e.getMessage());
-            throw new Unauthorized();
+            throw new CustomJwtException();
         }
 
     }

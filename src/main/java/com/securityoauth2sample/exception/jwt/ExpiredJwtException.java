@@ -2,15 +2,15 @@ package com.securityoauth2sample.exception.jwt;
 
 import com.securityoauth2sample.exception.CustomException;
 
-public class CustomExpiredJwtException extends CustomException {
+public class ExpiredJwtException extends CustomException {
 
     private static final String MESSAGE = "토큰이 만료되었습니다.";
 
-    public CustomExpiredJwtException() {
+    public ExpiredJwtException() {
         super(MESSAGE);
     }
 
-    public CustomExpiredJwtException(Throwable cause) {
+    public ExpiredJwtException(Throwable cause) {
         super(MESSAGE, cause);
     }
 

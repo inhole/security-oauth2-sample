@@ -1,5 +1,7 @@
 package com.securityoauth2sample.config.handler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.securityoauth2sample.dto.response.ErrorResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -9,12 +11,25 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 
 import java.io.IOException;
 
+import static jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 @Slf4j
 public class Http403Handler implements AccessDeniedHandler {
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
         log.error("AccessDeniedException is occurred. ", accessDeniedException);
-        response.sendError(HttpServletResponse.SC_FORBIDDEN, "접근 권한이 없습니다.");
+        ObjectMapper objectMapper = new ObjectMapper();
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .code("403")
+                .message("접근할 수 없습니다.")
+                .build();
+
+        response.setContentType(APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding(UTF_8.name());
+        response.setStatus(SC_FORBIDDEN);
+        objectMapper.writeValue(response.getWriter(), errorResponse);
     }
 }
