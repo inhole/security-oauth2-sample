@@ -1,7 +1,6 @@
 package com.securityoauth2sample.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import com.securityoauth2sample.domain.Member;
 import com.securityoauth2sample.dto.request.SignUp;
 import com.securityoauth2sample.repository.MemberRepository;
@@ -43,9 +42,6 @@ class AuthControllerTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private Gson gson;
-
-    @Autowired
     private JwtUtils jwtUtils;
 
     @BeforeEach
@@ -63,9 +59,11 @@ class AuthControllerTest {
                 .name("이인호")
                 .build();
 
+        String json = objectMapper.writeValueAsString(signUp);
+
         // when
         mockMvc.perform(post("/auth/signUp")
-                        .content(gson.toJson(signUp))
+                        .content(json)
                         .contentType(APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())
@@ -87,10 +85,11 @@ class AuthControllerTest {
                 .build();
         authService.signUp(signUp);
 
+        String json = objectMapper.writeValueAsString(signUp);
 
         // expected
         mockMvc.perform(post("/auth/login")
-                        .content(gson.toJson(signUp))
+                        .content(json)
                         .contentType(APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())

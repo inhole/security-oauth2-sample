@@ -48,11 +48,13 @@ public class JwtUtils {
 
     /**
      * RefreshToken 생성
+     * 잦은 로그인으로 인한 불편함을 줄이기 위해
      * @param authentication
      * @return
      */
     public String generateRefreshToken(Authentication authentication) {
         return generateToken(authentication, jwtProperties.getRefreshExpTime());
+        // 저장 및 업데이트...
     }
 
     /**

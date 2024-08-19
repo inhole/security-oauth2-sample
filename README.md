@@ -4,6 +4,24 @@
 스프링 시큐리티 (OAuth2) 설정 할때마다 매번 헷갈리고 이해 하고자 만든 샘플 프로젝트이다. 
 ````
 
+## 구현 내용
+````
+Spring Security 와 jwt(jjwt)를 활용
+    1). 회원가입 및 일반로그인
+    - 커스텀한 로그인 구현체 EmailPasswordAuthFilter.class 로 json 형식으로 로그인 값을 받아 처리한다.
+    - 패스워드 암호화는 Scrypt 알고리즘을 사용하여 구현했다.
+    
+    2). OAuth2 로그인 ( github, google, kakao )
+    - 해당 호스팅에서 인증 후 검증을 통해 회원가입 및 로그인 구현했다.
+    
+    3) JWT
+    - 로그인이 성공되면 AccessToken 과 RefreshToken을 생성하여 클라이언트에 AccessToken을 Response
+    - 캐싱 서버 Radis-Data 로 RefreshToken을 저장하며, filter를 통해 AccessToken이 만료되면 RefreshToken을 검증하여 AccessToken 재발급 
+    -> AccessToken의 유효기간을 짧게, RefreshToken은 길게 가져간다.
+    -> api 요청시 Header { Authorization : `Bearer ${AccessToken}` } 형식으로 검증
+````
+
+
 ## Spring Security Architecture
 ![security.png](src/main/resources/static/img/security.png)
 

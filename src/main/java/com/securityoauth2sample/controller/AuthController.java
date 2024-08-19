@@ -33,4 +33,8 @@ public class AuthController {
         return ResponseEntity.ok(loginResponse);
     }
 
+    @GetMapping("/test")
+    public String test() {
+        return "테스트 입니다.";
+    }
 }
