@@ -1,4 +1,4 @@
-package com.securityoauth2sample.config;
+package com.securityoauth2sample.config.properties;
 
 import io.jsonwebtoken.security.Keys;
 import lombok.Getter;

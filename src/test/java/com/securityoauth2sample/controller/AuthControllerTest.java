@@ -2,6 +2,7 @@ package com.securityoauth2sample.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.securityoauth2sample.domain.Member;
+import com.securityoauth2sample.dto.request.LoginRequest;
 import com.securityoauth2sample.dto.request.SignUp;
 import com.securityoauth2sample.repository.MemberRepository;
 import com.securityoauth2sample.service.AuthService;
@@ -85,7 +86,12 @@ class AuthControllerTest {
                 .build();
         authService.signUp(signUp);
 
-        String json = objectMapper.writeValueAsString(signUp);
+        LoginRequest loginRequest = LoginRequest.builder()
+                .email(signUp.getEmail())
+                .password(signUp.getPassword())
+                .build();
+
+        String json = objectMapper.writeValueAsString(loginRequest);
 
         // expected
         mockMvc.perform(post("/auth/login")

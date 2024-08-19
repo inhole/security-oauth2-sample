@@ -16,9 +16,13 @@ Spring Security 와 jwt(jjwt)를 활용
     
     3) JWT
     - 로그인이 성공되면 AccessToken 과 RefreshToken을 생성하여 클라이언트에 AccessToken을 Response
-    - 캐싱 서버 Radis-Data 로 RefreshToken을 저장하며, filter를 통해 AccessToken이 만료되면 RefreshToken을 검증하여 AccessToken 재발급 
-    -> AccessToken의 유효기간을 짧게, RefreshToken은 길게 가져간다.
+    - Radis-Data 로 RefreshToken을 저장하며, filter를 통해 AccessToken이 만료되면 RefreshToken을 검증하여 AccessToken 재발급 
+    -> AccessToken의 유효기간을 짧게, RefreshToken은 길게 가져간다. AccessToken을 자주 발급 시켜 보안적으로 안전
     -> api 요청시 Header { Authorization : `Bearer ${AccessToken}` } 형식으로 검증
+    
+    4) Radis 서버
+    - local window
+    - https://github.com/MicrosoftArchive/redis/releases
 ````
 
 

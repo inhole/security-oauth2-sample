@@ -1,7 +1,6 @@
 package com.securityoauth2sample.config.filter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.securityoauth2sample.config.JwtProperties;
+import com.securityoauth2sample.config.properties.JwtProperties;
 import com.securityoauth2sample.exception.jwt.CustomJwtException;
 import com.securityoauth2sample.exception.jwt.ExpectTokenException;
 import com.securityoauth2sample.exception.jwt.ExpiredJwtException;
@@ -16,13 +15,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.util.PatternMatchUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -36,18 +32,22 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
             // 1. token 추출
-            String token = resolveTokenFromRequest(request);
-            
-            // token 검증을 통해 만료 되었으면 refreshToken 으로 accessToken 재발급
-            if (token != null) {
-                // 2. 인증 정보 추출
-                Authentication authentication = jwtUtils.getAuthentication(token);
-                log.info("authentication = {}", authentication);
+            String accessToken = resolveTokenFromRequest(request);
 
-                // 3. SecurityContextHolder 인증 정보 set
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+            // 2. token 검증
+            if (jwtUtils.validateToken(accessToken)) {
+                setAuthentication(accessToken);
+            } else {
+                // accessToken 재발행
+                String issueAccessToken = jwtUtils.issueAccessToken(accessToken);
+
+                if (StringUtils.hasText(issueAccessToken)) {
+                    // 인증 정보 저장
+                    setAuthentication(issueAccessToken);
+                    response.setHeader(jwtProperties.getJwtHeader(), jwtProperties.getJwtType() + " " + issueAccessToken);
+                }
             }
-            // 4. 다음 필터로 이동
+            // 3. 다음 필터로 이동
             filterChain.doFilter(request, response);
 
         } catch (ExpiredJwtException e) {
@@ -55,6 +55,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         } catch (JwtException e) {
             throw new CustomJwtException(e);
         }
+    }
+
+    private void setAuthentication(String accessToken) {
+        // SecurityContextHolder 인증 정보 set
+        Authentication authentication = jwtUtils.getAuthentication(accessToken);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
     private String resolveTokenFromRequest(HttpServletRequest request) {

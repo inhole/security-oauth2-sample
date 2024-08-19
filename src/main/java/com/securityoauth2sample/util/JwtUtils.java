@@ -1,12 +1,10 @@
 package com.securityoauth2sample.util;
 
-import com.securityoauth2sample.config.model.PrincipalDetail;
-import com.securityoauth2sample.config.JwtProperties;
-import com.securityoauth2sample.domain.Member;
-import com.securityoauth2sample.domain.MemberRole;
+import com.securityoauth2sample.config.properties.JwtProperties;
+import com.securityoauth2sample.domain.Token;
 import com.securityoauth2sample.exception.jwt.CustomJwtException;
 import com.securityoauth2sample.exception.jwt.InvalidTokenException;
-import com.securityoauth2sample.exception.jwt.Unauthorized;
+import com.securityoauth2sample.service.TokenService;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +25,7 @@ import java.util.*;
 public class JwtUtils {
 
     private final JwtProperties jwtProperties;
+    private final TokenService tokenService;
 
     public String generateKey() {
         // 암호화 키 생성
@@ -48,13 +47,13 @@ public class JwtUtils {
 
     /**
      * RefreshToken 생성
-     * 잦은 로그인으로 인한 불편함을 줄이기 위해
      * @param authentication
      * @return
      */
-    public String generateRefreshToken(Authentication authentication) {
-        return generateToken(authentication, jwtProperties.getRefreshExpTime());
-        // 저장 및 업데이트...
+    public void generateRefreshToken(Authentication authentication, String accessToken) {
+        // redis refreshToken 저장 및 업데이트
+        String refreshToken = generateToken(authentication, jwtProperties.getRefreshExpTime());
+        tokenService.saveOrUpdate(authentication.getName(), accessToken, refreshToken);
     }
 
     /**
@@ -142,4 +141,20 @@ public class JwtUtils {
 
     }
 
+    public String issueAccessToken(String accessToken) {
+        // 1. null 체크
+        if (!StringUtils.hasText(accessToken)) return null;
+
+        // 2. token 추출
+        Token token = tokenService.findByAccessTokenOrThrow(accessToken);
+        String refreshToken = token.getRefreshToken();
+
+        // 3. refreshToken 검증
+        if (!validateToken(refreshToken)) return null;
+
+        // 4. accessToken 재발행
+        String issueAccessToken = generateAccessToken(getAuthentication(refreshToken));
+        tokenService.updateToken(issueAccessToken, token);
+        return issueAccessToken;
+    }
 }

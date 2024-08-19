@@ -35,11 +35,12 @@ public class CommonLoginSuccessHandler implements AuthenticationSuccessHandler {
 
         // 2. AccessToken, RefreshToken 생성
         String accessToken = jwtUtils.generateAccessToken(authentication);
-        jwtUtils.generateRefreshToken(authentication);
-        LoginResponse loginResponse = new LoginResponse(accessToken);
+        jwtUtils.generateRefreshToken(authentication, accessToken);
 
         // 3. response
+        LoginResponse loginResponse = new LoginResponse(accessToken);
         ObjectMapper objectMapper = new ObjectMapper();
+
         response.setContentType(APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(UTF_8.name());
         objectMapper.writeValue(response.getWriter(), loginResponse);
