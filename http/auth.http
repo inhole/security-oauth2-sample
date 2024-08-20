@@ -25,5 +25,11 @@ Content-Type: application/json
 
 GET localhost:8080/
 Content-Type: application/json
-#Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkZXYiLCJyb2xlIjpbeyJhdXRob3JpdHkiOiJST0xFX1VTRVIifV0sImlhdCI6MTcyNDA3Mjc1NywiZXhwIjoxNzI0MDczMzU3fQ.PVXi9sI51tWJVvui9poRrbmeC-R48Z0uqCafpAA-G-s
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkZXYiLCJyb2xlIjpbeyJhdXRob3JpdHkiOiJST0xFX1VTRVIifV0sImlhdCI6MTcyNDE3MTI1OCwiZXhwIjoxNzI0MTcxODU4fQ.Zleo-zytnry28WKRhQ3IURA0fSzvIF7y98yyzYlVIJ4
 
+
+### 로그아웃
+
+DELETE localhost:8080/auth/logout
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkZXYiLCJyb2xlIjpbeyJhdXRob3JpdHkiOiJST0xFX1VTRVIifV0sImlhdCI6MTcyNDE3MTA4MSwiZXhwIjoxNzI0MTcxNjgxfQ.5SB5ldJabQHJtQB8xJbwFN9Kv8saySMTakGTNOak5uo

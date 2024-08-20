@@ -74,7 +74,8 @@ public class SecurityConfig {
                                 new AntPathRequestMatcher("/"),
                                 new AntPathRequestMatcher("/test"),
                                 new AntPathRequestMatcher("/auth/signUp"),
-                                new AntPathRequestMatcher("/auth/login")
+                                new AntPathRequestMatcher("/auth/login"),
+                                new AntPathRequestMatcher("/auth/success")
                         )
                         .permitAll()
                         .anyRequest()
@@ -87,6 +88,7 @@ public class SecurityConfig {
 //                                .successHandler(oAuth2SuccessHandler))
 
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+//                .addFilterBefore(emailPasswordAuthFilter(), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(e -> e
                         .accessDeniedHandler(new Http403Handler())
                         .authenticationEntryPoint(new Http401Handler())

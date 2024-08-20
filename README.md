@@ -25,6 +25,17 @@ Spring Security 와 jwt(jjwt)를 활용
     - https://github.com/MicrosoftArchive/redis/releases
 ````
 
+## 이슈 내용
+````
+#1 @AuthenticationPrincipal
+1. 발단
+- 로그인 후 로그아웃 요청 시 @AuthenticationPrincipal 객체가 null이 발생하는 문제
+2. 원인
+- 인증된 사용자 정보가 PrincipalDetail이 아니라 Spring Security의 기본 User 객체로 반환되고 있었다.
+3. 해결
+- 인증 정보를 세팅 해주는 부분 에서 PrincipalDetail이 객체로 저장 되게 바꾸었다.
+-   
+````
 
 ## Spring Security Architecture
 ![security.png](src/main/resources/static/img/security.png)

@@ -1,6 +1,8 @@
 package com.securityoauth2sample.util;
 
+import com.securityoauth2sample.config.model.PrincipalDetail;
 import com.securityoauth2sample.config.properties.JwtProperties;
+import com.securityoauth2sample.domain.Member;
 import com.securityoauth2sample.domain.Token;
 import com.securityoauth2sample.exception.jwt.CustomJwtException;
 import com.securityoauth2sample.exception.jwt.InvalidTokenException;
@@ -87,8 +89,12 @@ public class JwtUtils {
         // 2. 권한 추출
         List<SimpleGrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(jwtProperties.getKeyRole()));
 
-        // 3. security의 User 객체 생성
-        User principal = new User(claims.getSubject(), "", authorities);
+        // 3. PrincipalDetail 객체 생성
+        Member member = Member.builder()
+                .email(claims.getSubject())
+                .build();
+        PrincipalDetail principal = new PrincipalDetail(member, authorities);
+//        User principal = new User(claims.getSubject(), "", authorities);
 
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
@@ -141,6 +147,11 @@ public class JwtUtils {
 
     }
 
+    /**
+     * AccessToken 만료시 reFreshToken 검증 후 재발급
+     * @param accessToken
+     * @return
+     */
     public String issueAccessToken(String accessToken) {
         // 1. null 체크
         if (!StringUtils.hasText(accessToken)) return null;
