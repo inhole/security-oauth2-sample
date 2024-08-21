@@ -42,8 +42,19 @@ Spring Security 와 jwt(jjwt)를 활용
 1. github
 - github > Settings > Developer Settings > New OAuth App
 - 각 정보와 redirect url 을 맞게 입력 후 생성을 완료 하면 Client ID 가 생성이 되고 Client secrets 은 추가로 생성 할 수 있다.
+-> https://github.com/settings/developers
+
 2. google
+- Google API Console 에서 프로젝트, 사용자 인증 정보, 리디렉션 URI를 설정
+-> https://developers.google.com/identity/openid-connect/openid-connect?hl=ko
+
+참고: https://github.com/spring-projects/spring-security/tree/5.2.12.RELEASE/samples/boot/oauth2login
+
 3. kakao
+- 앱 등록 및 동의 항목
+-> https://developers.kakao.com/console
+출처 참고: https://velog.io/@zhyun/spring-boot-OAuth-2-kakao-%EB%A1%9C%EA%B7%B8%EC%9D%B8-%EC%97%B0%EB%8F%99
+
 ````
 
 ## Spring Security Architecture

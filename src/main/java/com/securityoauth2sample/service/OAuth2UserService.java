@@ -40,6 +40,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
 
         // 2. 호스팅에 맞는 OAuth2UserInfo 생성
         OAuth2UserInfo oAuth2UserInfo = OAuth2UserInfo.of(registrationId, oAuth2UserAttributes);
+        log.info("[OAuth2UserService] ::::::::::: oAuth2UserInfo: {}", oAuth2UserInfo);
 
         // 3. 유저 정보 조회 및 저장
         Member member = getOrSave(oAuth2UserInfo);
