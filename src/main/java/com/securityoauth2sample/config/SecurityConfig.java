@@ -10,6 +10,7 @@ import com.securityoauth2sample.config.handler.Http403Handler;
 import com.securityoauth2sample.config.model.PrincipalDetail;
 import com.securityoauth2sample.domain.Member;
 import com.securityoauth2sample.repository.MemberRepository;
+import com.securityoauth2sample.service.OAuth2UserService;
 import com.securityoauth2sample.util.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -44,12 +45,14 @@ public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final MemberRepository memberRepository;
     private final JwtUtils jwtUtils;
+    private final OAuth2UserService oAuth2UserService;
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() { // security를 적용하지 않을 리소스
         return web -> web.ignoring()
                 .requestMatchers("/favicon.ico")
                 .requestMatchers("/error")
+                .requestMatchers("**.html")
                 .requestMatchers(toH2Console());
     }
 
@@ -72,7 +75,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
                                 new AntPathRequestMatcher("/"),
-                                new AntPathRequestMatcher("/test"),
+                                new AntPathRequestMatcher("/oauth2"),
                                 new AntPathRequestMatcher("/auth/signUp"),
                                 new AntPathRequestMatcher("/auth/login"),
                                 new AntPathRequestMatcher("/auth/success")
@@ -82,13 +85,12 @@ public class SecurityConfig {
                         .authenticated()
                 )
 
-//                .oauth2Login(oauth -> // OAuth2 로그인 기능에 대한 여러 설정의 진입점
-//                        // OAuth2 로그인 성공 이후 사용자 정보를 가져올 때의 설정을 담당
-//                        oauth.userInfoEndpoint(c -> c.userService(oAuth2UserService))
-//                                .successHandler(oAuth2SuccessHandler))
+                .oauth2Login(oauth -> // OAuth2 로그인 기능에 대한 여러 설정의 진입점
+                        // OAuth2 로그인 성공 이후 사용자 정보를 가져올 때의 설정을 담당
+                        oauth.userInfoEndpoint(c -> c.userService(oAuth2UserService))
+                                .successHandler(new CommonLoginSuccessHandler(jwtUtils)))
 
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-//                .addFilterBefore(emailPasswordAuthFilter(), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(e -> e
                         .accessDeniedHandler(new Http403Handler())
                         .authenticationEntryPoint(new Http401Handler())

@@ -37,6 +37,15 @@ Spring Security 와 jwt(jjwt)를 활용
 -   
 ````
 
+## OAuth2 각 호스트 설정
+```` 
+1. github
+- github > Settings > Developer Settings > New OAuth App
+- 각 정보와 redirect url 을 맞게 입력 후 생성을 완료 하면 Client ID 가 생성이 되고 Client secrets 은 추가로 생성 할 수 있다.
+2. google
+3. kakao
+````
+
 ## Spring Security Architecture
 ![security.png](src/main/resources/static/img/security.png)
 

@@ -21,11 +21,11 @@ Content-Type: application/json
 }
 
 
-### test 로그인
+### 메인
 
-GET localhost:8080/
+GET localhost:8080/test
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkZXYiLCJyb2xlIjpbeyJhdXRob3JpdHkiOiJST0xFX1VTRVIifV0sImlhdCI6MTcyNDE3MTI1OCwiZXhwIjoxNzI0MTcxODU4fQ.Zleo-zytnry28WKRhQ3IURA0fSzvIF7y98yyzYlVIJ4
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkZXYiLCJyb2xlIjpbeyJhdXRob3JpdHkiOiJST0xFX1VTRVIifV0sImlhdCI6MTcyNDI0MjA2NywiZXhwIjoxNzI0MjQyNjY3fQ.UVqKywn5HEP7jzOLsa9z-Fo4DJFWvHvCPR7UjVtOzWk
 
 
 ### 로그아웃

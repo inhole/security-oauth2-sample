@@ -32,7 +32,8 @@ public class CommonLoginSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
 
-//        PrincipalDetail principal = (PrincipalDetail) authentication.getPrincipal();
+        PrincipalDetail principal = (PrincipalDetail) authentication.getPrincipal();
+        log.info("[CommonLoginSuccessHandler] principal: {}", principal);
 
         // 1. AccessToken, RefreshToken 생성
         String accessToken = jwtUtils.generateAccessToken(authentication);

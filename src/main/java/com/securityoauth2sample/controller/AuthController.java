@@ -47,7 +47,6 @@ public class AuthController {
      */
     @DeleteMapping("/auth/logout")
     public ResponseEntity<Void> logout(@AuthenticationPrincipal PrincipalDetail principalDetail) {
-        log.info("Principal ::: {}", SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         tokenService.deleteRefreshToken(principalDetail.getUsername());
         return ResponseEntity.noContent().build();
     }

@@ -35,8 +35,10 @@ public class OAuth2UserInfo {
     }
 
     private static OAuth2UserInfo ofGithub(Map<String, Object> attributes) {
-        // github 파싱 값 확인...
         return OAuth2UserInfo.builder()
+                .name((String) attributes.get("name"))
+                .email((String) attributes.get("login"))
+                .profile((String) attributes.get("avatar_url"))
                 .build();
     }
 
@@ -64,7 +66,6 @@ public class OAuth2UserInfo {
                 .name(name)
                 .email(email)
                 .profile(profile)
-                .memberKey(KeyGenerator.generateKey())
                 .memberRole(MemberRole.USER)
                 .build();
     }
