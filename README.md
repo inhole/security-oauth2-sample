@@ -34,7 +34,6 @@ Spring Security 와 jwt(jjwt)를 활용
 - 인증된 사용자 정보가 PrincipalDetail이 아니라 Spring Security의 기본 User 객체로 반환되고 있었다.
 3. 해결
 - 인증 정보를 세팅 해주는 부분 에서 PrincipalDetail이 객체로 저장 되게 바꾸었다.
--   
 ````
 
 ## OAuth2 각 호스트 설정
